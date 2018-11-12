@@ -1,5 +1,6 @@
-# This python script uses the calibration chessboard images
-# to compute the camera calibration and distortion coefficients.
+# This is a standalone python script to compute the
+# camera calibration matrix and distortion coefficients
+# from the given chessboard images.
 # It also tests/demostrates the undistortion on one of the
 # calibration images.
 
@@ -51,7 +52,7 @@ for fname in cal_file_names:
 # Read one of the calibration images. We will use this 
 # to find the size (width x height) of the image 
 # as well as to test the camera calibration.
-test_img = cv2.imread('camera_cal/calibration2.jpg')
+test_img = cv2.imread('camera_cal/calibration1.jpg')
 img_size = (test_img.shape[1], img.shape[0])
 
 # Calibrate camera        
