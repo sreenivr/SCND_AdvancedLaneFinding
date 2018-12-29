@@ -19,11 +19,17 @@ def undistort(img, mtx, dist):
 
 # Given the src and dst points, 
 # return Perspective transformed image
-def unwarp(img, src, dst):
+def warp(img, src, dst):
     h,w = img.shape[:2]
     M = cv2.getPerspectiveTransform(src, dst)
     warped = cv2.warpPerspective(img, M, (w,h), flags=cv2.INTER_LINEAR)
     return warped
+
+def unwarp(img, src, dst):
+    h,w = img.shape[:2]
+    M_inv = cv2.getPerspectiveTransform(dst, src)
+    unwarped = cv2.warpPerspective(img, M_inv, (w,h), flags=cv2.INTER_LINEAR)
+    return unwarped
 
 def abs_sobel_thresh(img, orient='x', sobel_kernel=3, thresh=(0, 255)):
     # Calculate directional gradient
