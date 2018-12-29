@@ -1,5 +1,7 @@
-# Image processing and vision pipeline is implemented
-# in this source file.
+###############################################################################
+# This file contails Gradient and color thresholding functions 
+# that creates binary images.
+###############################################################################
 
 import numpy as np
 import cv2
