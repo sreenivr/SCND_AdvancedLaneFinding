@@ -20,14 +20,12 @@ In this section I will describe how each of the Rubric points are implemented in
 
 ### Camera Calibration 
 
-A stand-alone python script "calibrate_caera.py" was implemented to compute the camera calibration and distortion coeficients of the camera from the given chess board images. This python script uses openCV funtions to compute the camera calibartion as described in the class. This script also writes the calibration/coeficients to a file using pickle ("calibration.p"), so that this can be utilized in the image pipeline implementation.
+A stand-alone python script "calibrate_camera.py" was implemented to compute the camera calibration and distortion coeficients of the camera based on the given chessboard images. This python script uses openCV funtions (findChessboardCorners() and calibrateCamera()) to compute the camera calibartion as described in the class. OpenCV function undistort() can then be used to remove the camera distortion. This script also writes the calibration/coeficients to a file using pickle ("calibration.p"), so that this can be utilized in the image pipeline implementation.
 
-Following is an example of original and undistorted chess board image using the camera calibration.
-
+Image below shows the result of distortion correction using camera calibration and disctortion coeficients on a eample chess board image.
 ![alt text](output_images/undistorted_chessboard.jpeg "Undistorted Chessboard image")
 
-This is another example of undistorted road image.
-
+Following is another example of distortion corrected raod image.
 ![alt text](output_images/undistorted_test1.jpeg "Undistorted test road image" )
 
 
