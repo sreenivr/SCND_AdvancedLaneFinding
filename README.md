@@ -7,19 +7,29 @@ The high level goal of this project is to implement an image pipeline to detect 
 
 ### High level steps of this project are following,
 
-* Compute camera calibration and distortion coefficients from the chessbaord images.
+* Compute camera calibration and distortion coefficients from the chessboard images.
 * Apply distortion correction on the images/frames.
 * Explore and find appropriate color transforms and gradient to create thresholded binary images
 * Apply perspective transform to warp the image to create warped image.
 * Identify the lane lines pixels and fit them to a second order polynomial.
-* Compute the radius of the cauvature of the lane and position of the vehicle from the center of lane.
+* Compute the radius of the carvature of the lane and position of the vehicle from the center of lane.
 * Perform inverse transform to plot the detected lanes back onto original road images. 
 
+## Rubric Points 
 
+In this section I will describe how each of the Rubric points are implemented in my implementation.
 
+Camera Calibration 
 
+A stand-alone python script "calibrate_caera.py" was implemented to compute the camera calibration and distortion coeficients of the camera from the given chess board images. This python script uses openCV funtions to compute the camera calibartion as described in the class. This script also writes the calibration/coeficients to a file using pickle ("calibration.p"), so that this can be utilized in the image pipeline implementation.
 
+Following is an example of original and undistorted chess board image using the camera calibration.
 
+<img src="output_images/undistorted_chessboard.jpg" width="480" alt="Combined Image" />
+
+This is another example of undistorted road image.
+
+<img src="output_images/undistorted_test1.jpg" width="480" alt="Combined Image" />
 
 
 
