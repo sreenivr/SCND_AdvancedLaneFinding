@@ -50,22 +50,9 @@ class Line():
                 #print("Best vs fit", self.best_fit, fit)
         else:
             self.detected = None
-            
+
 left_line = Line()
 right_line = Line()
-        
-# Global variables to keep track of lane line parameters
-# detected from previous frames.
-poly_left_fit = None
-poly_right_fit = None       
-running_mean_hdistance = 0  # To be removed
-center_offset_meters = 0
-avg_radius = 0
-
-# Added for debugging
-num_frames = 0              
-num_invalid_frames = 0
-        
         
 # This function finds lane lines using histogram 
 # and sliding window method.
@@ -73,7 +60,7 @@ def sliding_window_lane_search(binary_warped, visualize=False):
     # Take a histogram of the bottom half of the image
     histogram = np.sum(binary_warped[binary_warped.shape[0]//2:,:], axis=0)
     
-    # TO-DO : Following line is reuired only for visualization ??
+    # TO-DO : Following line is required only for visualization ??
     # Create an output image to draw on and visualize the result
     out_img = np.dstack((binary_warped, binary_warped, binary_warped))
     
@@ -291,8 +278,8 @@ def get_predicted_lane(img_shape, left_fit, right_fit):
 # Calculates the curvature of polynomial functions in meters.    
 def measure_curvature_real(ploty, left_fit, right_fit):
     # Define conversions in x and y from pixels space to meters
-    #ym_per_pix = 30/720 # meters per pixel in y dimension
-    ym_per_pix = 3.0/100 # meters per pixel in y dimension
+    ym_per_pix = 30/720 # meters per pixel in y dimension
+    #ym_per_pix = 3.0/100 # meters per pixel in y dimension
     xm_per_pix = 3.7/700 # meters per pixel in x dimension
        
     # Define y-value where we want radius of curvature
@@ -336,32 +323,17 @@ def get_thresholded_image(img):
     hls_lselect_img = hls_lselect(img, thresh=(200,255))                          
     lab_bselect_img = lab_bselect(img, thresh=(200,255))
     
-    # Selected HLS-L Channel to pick up white lines and 
+    # Using HLS-L Channel to pick up white lines and 
     # LAB-B channel to detect yellow lines.
     threshold_img = np.zeros_like(hls_lselect_img)
     threshold_img[(hls_lselect_img == 1) | (lab_bselect_img == 1)] = 1  
     return threshold_img
-
-
-        
-    
     
 # This function implements the image pipeline.
 # Given an image, it finds the lane lines, draws markers etc.    
-def image_pipeline(img):
-    global poly_left_fit # To be removed
-    global poly_right_fit
-    
-    global avg_radius
-    global center_offset_meters
-    
-    global num_frames
-    global num_invalid_frames
-    
+def image_pipeline(img):    
     global left_line
     global right_line
-    
-    num_frames = num_frames + 1
     
     # undistort the image 
     undist_img = undistort(img, mtx, dist)
@@ -393,8 +365,6 @@ def image_pipeline(img):
         # Search around polynimial computed in the previous iteration
         left_fit, right_fit = search_around_poly(binary_warped, left_line.best_fit, right_line.best_fit)
         #left_fit, right_fit = None, None
-    
-    invalid_line = False
     
     # Compute the width of the lane based on the left and right x-intercepts.
     if left_fit is not None and right_fit is not None:
@@ -466,8 +436,6 @@ white_clip = clip1.fl_image(image_pipeline) #NOTE: this function expects color i
 white_clip.write_videofile(output, audio=False)
 end_time = time.time()
 print("Time taken to process the video = %d sec"% (end_time - start_time))
-print("Num frames = ", num_frames)
-print("Num invalid frames = ", num_invalid_frames)
 
 '''
 print(all_lane_width)
