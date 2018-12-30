@@ -24,11 +24,11 @@ A stand-alone python script "calibrate_caera.py" was implemented to compute the 
 
 Following is an example of original and undistorted chess board image using the camera calibration.
 
-![alt text](https://github.com/sreenivr/SCND_AdvancedLaneFinding/blob/master/output_images/undistorted_chessboard.jpeg)
+![alt text](output_images/undistorted_chessboard.jpeg "Undistorted Chessboard image")
 
 This is another example of undistorted road image.
 
-![alt text](https://github.com/sreenivr/SCND_AdvancedLaneFinding/blob/master/output_images/undistorted_test1.jpeg)
+![alt text](output_images/undistorted_test1.jpeg "Undistorted test road image" )
 
 
 
