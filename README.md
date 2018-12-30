@@ -1,6 +1,5 @@
 ## Advanced Lane Finding
 
-[![Udacity - Self-Driving Car NanoDegree](https://s3.amazonaws.com/udacity-sdc/github/shield-carnd.svg)](http://www.udacity.com/drive)
 This repository contains the project I implemented as part of Udacity Self Driving Car Nano Degree Program.
 
 The high level goal of this project is to implement an image pipeline to detect the lane lines from the given image or video.
@@ -25,7 +24,7 @@ A stand-alone python script "calibrate_caera.py" was implemented to compute the 
 
 Following is an example of original and undistorted chess board image using the camera calibration.
 
-<img src="output_images/undistorted_chessboard.jpg" width="480" alt="Combined Image" />
+<img src="output_images/undistorted_chessboard.jpg" width="640" alt="Combined Image" />
 
 This is another example of undistorted road image.
 
