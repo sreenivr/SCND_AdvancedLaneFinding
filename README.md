@@ -1,4 +1,29 @@
 ## Advanced Lane Finding
+
+The goals of this project are following,
+
+* Compute camera calibration and distortion coefficients from the chessbaord images.
+* Apply distortion correction on the images/frames.
+* Explore and find appropriate color transforms and gradient to create thresholded binary images
+* Apply perspective transform to warp the image to create warped image.
+* Identify the lane lines pixels and fit them to a second order polynomial.
+* Compute the radius of the cauvature of the lane and position of the vehicle from the center of lane.
+* Perform inverse transform to plot the detected lanes back onto original road images. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 [![Udacity - Self-Driving Car NanoDegree](https://s3.amazonaws.com/udacity-sdc/github/shield-carnd.svg)](http://www.udacity.com/drive)
 
 
