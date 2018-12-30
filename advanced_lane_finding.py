@@ -276,18 +276,24 @@ def get_predicted_lane(img_shape, left_fit, right_fit):
     return left_fitx, right_fitx, ploty
     
 # Calculates the curvature of polynomial functions in meters.    
-def measure_curvature_real(ploty, left_fit, right_fit):
+def measure_curvature_real(h, left_fitx, right_fitx):
     # Define conversions in x and y from pixels space to meters
-    ym_per_pix = 30/720 # meters per pixel in y dimension
-    #ym_per_pix = 3.0/100 # meters per pixel in y dimension
-    xm_per_pix = 3.7/700 # meters per pixel in x dimension
-       
+    #ym_per_pix = 30/720 # meters per pixel in y dimension
+    ym_per_pix = 3.0/100 # meters per pixel in y dimension
+    #xm_per_pix = 3.7/700 # meters per pixel in x dimension
+    xm_per_pix = 3.7/380 # meters per pixel in x dimension
+    
+    y_points = np.linspace(0, h-1, h)
     # Define y-value where we want radius of curvature
     # We'll choose the maximum y-value, corresponding to the bottom of the image
-    y_eval = np.max(ploty)
+    y_eval = np.max(y_points)
     
-    left_curverad = ((1 + (2*left_fit[0]*y_eval*ym_per_pix + left_fit[1])**2)**1.5) / np.absolute(2*left_fit[0])
-    right_curverad = ((1 + (2*right_fit[0]*y_eval*ym_per_pix + right_fit[1])**2)**1.5) / np.absolute(2*right_fit[0])
+    # Fit polynomial based on real world space
+    left_fit_world_space = np.polyfit(y_points*ym_per_pix, left_fitx * xm_per_pix, 2)
+    right_fit_world_space = np.polyfit(y_points*ym_per_pix, right_fitx * xm_per_pix, 2)
+    
+    left_curverad = ((1 + (2*left_fit_world_space[0]*y_eval*ym_per_pix + left_fit_world_space[1])**2)**1.5) / np.absolute(2*left_fit_world_space[0])
+    right_curverad = ((1 + (2*right_fit_world_space[0]*y_eval*ym_per_pix + right_fit_world_space[1])**2)**1.5) / np.absolute(2*right_fit_world_space[0])
     
     #print(left_curverad, right_curverad)
     return (left_curverad, right_curverad)
@@ -390,7 +396,7 @@ def image_pipeline(img):
         left_fitx, right_fitx, ploty = get_predicted_lane(binary_warped.shape, left_line.best_fit, right_line.best_fit)
         
         # Compute the radius of curvature
-        left_radius, right_radius = measure_curvature_real(ploty, left_line.best_fit, right_line.best_fit)
+        left_radius, right_radius = measure_curvature_real(h, left_fitx, right_fitx)
         avg_radius = (left_radius + right_radius)/2
         radius_str = "Radius : %.3f m" % avg_radius
         
