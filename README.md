@@ -38,10 +38,9 @@ Following is an example of distortion corrected road image.
 I have tried different color transform such as HLS (Hue Lightness Saturation), LAB and gradient (Absolute Sobel, Magnitude Sobel, Direction Sobel) methods. I have applied these different methods on a set of road images provided under the "test_images" directory.
 
 Result of applying these different methods are shown below.
-
-
 ![alt text](output_images/image_thresholds.jpg "Exploring Color transforms and Gradients")
 
+It turns out that LAB-B channel is pretty good in finding the yellow lines on the road and HLS-L channel is good in detecting white lines. I found that the the Gradients methods are either detecting too many unwanted pixles or not detecting the lines especialely under tricky lighting conditions. Hence I decided to use combination of LAB-B and HLS-L to perform 
 
 #### 3. Describe how (and identify where in your code) you performed a perspective transform and provide an example of a transformed image.
 
