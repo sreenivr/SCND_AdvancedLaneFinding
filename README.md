@@ -1,6 +1,11 @@
 ## Advanced Lane Finding
 
-The goals of this project are following,
+[![Udacity - Self-Driving Car NanoDegree](https://s3.amazonaws.com/udacity-sdc/github/shield-carnd.svg)](http://www.udacity.com/drive)
+This repository contains the project I implemented as part of Udacity Self Driving Car Nano Degree Program.
+
+The high level goal of this project is to implement an image pipeline to detect the lane lines from the given image or video.
+
+Hig level steps of this project are following,
 
 * Compute camera calibration and distortion coefficients from the chessbaord images.
 * Apply distortion correction on the images/frames.
