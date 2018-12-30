@@ -1,4 +1,68 @@
 ## Advanced Lane Finding
+
+This repository contains the project I implemented as part of Udacity Self Driving Car Nano Degree Program.
+
+The high level goal of this project is to implement an image pipeline to detect the lane boundaries from the given image or video.
+
+### High level steps of this project are following,
+
+* Compute camera calibration and distortion coefficients from the chessboard images.
+* Apply distortion correction on the images/frames.
+* Explore and find appropriate color transforms and gradient to create thresholded binary images
+* Apply perspective transform to warp the image to create warped image.
+* Identify the lane lines pixels and fit them to a second order polynomial.
+* Compute the radius of the carvature of the lane and position of the vehicle from the center of lane.
+* Perform inverse transform to plot the detected lanes back onto original road images. 
+* Output visual display of the lane boundaries and numerical estimation of lane curvature and vehicle position.
+
+## Rubric Points 
+
+In this section I will describe how each of the Rubric points are implemented in my implementation.
+
+### Camera Calibration 
+
+A stand-alone python script "calibrate_camera.py" was implemented to compute the camera calibration and distortion coeficients of the camera based on the given chessboard images. This python script uses openCV funtions (findChessboardCorners() and calibrateCamera()) to compute the camera calibartion as described in the class. OpenCV function undistort() can then be used to remove the camera distortion. This script also writes the calibration/coeficients to a file using pickle ("calibration.p"), so that this can be utilized in the image pipeline implementation.
+
+Image below shows the result of distortion correction using camera calibration and distortion coeficients on a eample chess board image.
+![alt text](output_images/undistorted_chessboard.jpeg "Undistorted Chessboard image")
+
+### Image Pipeline
+
+#### 1. Provide an example of a distortion-corrected image.
+
+Following is an example of distortion corrected road image.
+![alt text](output_images/undistorted_test1.jpeg "Undistorted test road image" )
+
+#### 2. Describe how (and identify where in your code) you used color transforms, gradients or other methods to create a thresholded binary image. Provide an example of a binary image result.
+
+I have tried different color transform such as HLS (Hue Lightness Saturation), LAB and gradient (Absolute Sobel, Magnitude Sobel, Direction Sobel) methods. I have applied these different methods on a set of road images provided under the "test_images" directory.
+
+Result of applying these different methods are shown below.
+
+
+![alt text](output_images/image_thresholds.jpg "Exploring Color transforms and Gradients")
+
+
+#### 3. Describe how (and identify where in your code) you performed a perspective transform and provide an example of a transformed image.
+
+#### 4. Describe how (and identify where in your code) you identified lane-line pixels and fit their positions with a polynomial?
+
+#### 5. Describe how (and identify where in your code) you calculated the radius of curvature of the lane and the position of the vehicle with respect to center.
+
+#### 6. Provide an example image of your result plotted back down onto the road such that the lane area is identified clearly.
+
+
+### Pipeline (Video)
+
+Provide a link to your final video output. Your pipeline should perform reasonably well on the entire project video (wobbly lines are ok but no catastrophic failures that would cause the car to drive off the road!)
+
+
+### Briefly discuss any problems / issues you faced in your implementation of this project. Where will your pipeline likely fail? What could you do to make it more robust?
+
+
+
+
+
 [![Udacity - Self-Driving Car NanoDegree](https://s3.amazonaws.com/udacity-sdc/github/shield-carnd.svg)](http://www.udacity.com/drive)
 
 
