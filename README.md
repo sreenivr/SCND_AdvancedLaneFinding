@@ -5,7 +5,7 @@ This repository contains the project I implemented as part of Udacity Self Drivi
 
 The high level goal of this project is to implement an image pipeline to detect the lane lines from the given image or video.
 
-Hig level steps of this project are following,
+# High level steps of this project are following,
 
 * Compute camera calibration and distortion coefficients from the chessbaord images.
 * Apply distortion correction on the images/frames.
