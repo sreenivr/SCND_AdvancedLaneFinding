@@ -18,18 +18,17 @@ The high level goal of this project is to implement an image pipeline to detect 
 
 In this section I will describe how each of the Rubric points are implemented in my implementation.
 
-Camera Calibration 
+### Camera Calibration 
 
 A stand-alone python script "calibrate_caera.py" was implemented to compute the camera calibration and distortion coeficients of the camera from the given chess board images. This python script uses openCV funtions to compute the camera calibartion as described in the class. This script also writes the calibration/coeficients to a file using pickle ("calibration.p"), so that this can be utilized in the image pipeline implementation.
 
 Following is an example of original and undistorted chess board image using the camera calibration.
 
-<img src="output_images/undistorted_chessboard.jpg" width="640" alt="Combined Image" />
+![alt text](https://github.com/sreenivr/SCND_AdvancedLaneFinding/blob/master/output_images/undistorted_chessboard.jpeg)
 
 This is another example of undistorted road image.
 
-<img src="output_images/undistorted_test1.jpg" width="480" alt="Combined Image" />
-
+![alt text](https://github.com/sreenivr/SCND_AdvancedLaneFinding/blob/master/output_images/undistorted_test1.jpeg)
 
 
 
