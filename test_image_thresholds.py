@@ -2,38 +2,95 @@ from image_thresholds import *
 import cv2
 import numpy as np
 
+# Define a class to receive the characteristics of each line detection
+class Line():
+    def __init__(self):
+        # was the line detected in the last iteration?
+        self.detected = False  
+        #Number of recent values to average
+        self.n = 8
+        # x values of the last n fits of the line
+        self.recent_xfitted = [] 
+        #average x values of the fitted line over the last n iterations
+        self.bestx = None     
+        #polynomial coefficients averaged over the last n iterations
+        self.best_fit = None  
+        #polynomial coefficients for the most recent fit
+        self.current_fit = []  
+        #radius of curvature of the line in some units
+        self.radius_of_curvature = None 
+        #distance in meters of vehicle center from the line
+        self.line_base_pos = None 
+        #difference in fit coefficients between last and new fits
+        self.diffs = np.array([0,0,0], dtype='float') 
+        #x values for detected line pixels
+        self.allx = None  
+        #y values for detected line pixels
+        self.ally = None  
+   
+    def update_poly_fit(self, fit):
+        if fit is not None:
+            if self.best_fit is not None:
+                # find how far away this fit from the best fit
+                self.diffs = abs(fit - self.best_fit)
+            # If it is too far from best fit, reject this fit
+            if (self.diffs[0] > 0.001 or \
+                self.diffs[1] > 1.0   or \
+                self.diffs[2] > 100.0) and \
+                len(self.current_fit) > 0:
+                self.detected = False
+            else:
+                self.detected = True
+                self.current_fit.append(fit)
+                if len(self.current_fit) > self.n:
+                    # remove old values and keep recent 'n' values
+                    self.current_fit = self.current_fit[len(self.current_fit)-self.n:]
+                # Best fit is the average of recent good fits
+                self.best_fit = np.average(self.current_fit, axis=0)
+                #print("Best vs fit", self.best_fit, fit)
+        else:
+            self.detected = None
+            
+left_line = Line()
+right_line = Line()
+        
 # Global variables to keep track of lane line parameters
 # detected from previous frames.
 poly_left_fit = None
 poly_right_fit = None       
-running_mean_hdistance = 0 
+running_mean_hdistance = 0  # To be removed
 center_offset_meters = 0
 avg_radius = 0
 
-num_frames = 0
+# Added for debugging
+num_frames = 0              
 num_invalid_frames = 0
+        
         
 # This function finds lane lines using histogram 
 # and sliding window method.
 def sliding_window_lane_search(binary_warped, visualize=False):
-    print("wwwwwwwwwwwwwww")
     # Take a histogram of the bottom half of the image
     histogram = np.sum(binary_warped[binary_warped.shape[0]//2:,:], axis=0)
+    
+    # TO-DO : Following line is reuired only for visualization ??
     # Create an output image to draw on and visualize the result
     out_img = np.dstack((binary_warped, binary_warped, binary_warped))
+    
     # Find the peak of the left and right halves of the histogram
     # These will be the starting point for the left and right lines
     midpoint = np.int(histogram.shape[0]//2)
-    leftx_base = np.argmax(histogram[:midpoint])
-    rightx_base = np.argmax(histogram[midpoint:]) + midpoint
+    quarter_point = np.int(midpoint//2)
+    leftx_base = np.argmax(histogram[quarter_point:midpoint]) + quarter_point
+    rightx_base = np.argmax(histogram[midpoint:(midpoint+quarter_point)]) + midpoint
 
     # HYPERPARAMETERS
     # Choose the number of sliding windows
     nwindows = 9
     # Set the width of the windows +/- margin
-    margin = 100
+    margin = 80
     # Set minimum number of pixels found to recenter window
-    minpix = 50
+    minpix = 30
 
     # Set height of windows - based on nwindows above and image shape
     window_height = np.int(binary_warped.shape[0]//nwindows)
@@ -103,6 +160,7 @@ def sliding_window_lane_search(binary_warped, visualize=False):
         left_fit = np.polyfit(lefty, leftx, 2)
         right_fit = np.polyfit(righty, rightx, 2)
     except:
+        print("exception in sliding window poly fit")
         return None, None
 
     if visualize is True:
@@ -131,57 +189,13 @@ def sliding_window_lane_search(binary_warped, visualize=False):
     
     return (left_fit, right_fit)
 
-## TO BE REMOVED. This function is not reuired anymore.
-def fit_polynomial(binary_warped):
-    # Find our lane pixels first
-    leftx, lefty, rightx, righty, out_img = find_lane_pixels(binary_warped)
-
-    # Fit a second order polynomial to each using `np.polyfit`
-    left_fit = np.polyfit(lefty, leftx, 2)
-    right_fit = np.polyfit(righty, rightx, 2)
-
-    # Generate x and y values for plotting
-    ploty = np.linspace(0, binary_warped.shape[0]-1, binary_warped.shape[0] )
-    try:
-        left_fitx = left_fit[0]*ploty**2 + left_fit[1]*ploty + left_fit[2]
-        right_fitx = right_fit[0]*ploty**2 + right_fit[1]*ploty + right_fit[2]
-    except TypeError:
-        # Avoids an error if `left` and `right_fit` are still none or incorrect
-        print('The function failed to fit a line!')
-        left_fitx = 1*ploty**2 + 1*ploty
-        right_fitx = 1*ploty**2 + 1*ploty
-
-    ## Visualization ##
-    # Colors in the left and right lane regions
-    out_img[lefty, leftx] = [255, 0, 0]
-    out_img[righty, rightx] = [0, 0, 255]
-
-    # Plots the left and right polynomials on the lane lines
-    plt.plot(left_fitx, ploty, color='yellow')
-    plt.plot(right_fitx, ploty, color='yellow')
-
-    return (out_img, left_fit, right_fit)
-
-# TO-DO : Remove this function as it is no longer used.    
-def fit_poly(img_shape, leftx, lefty, rightx, righty):
-    ### Fit a second order polynomial to each with np.polyfit() ###
-    left_fit = np.polyfit(lefty, leftx, 2)
-    right_fit = np.polyfit(righty, rightx, 2)
-    # Generate x and y values for plotting
-    ploty = np.linspace(0, img_shape[0]-1, img_shape[0])
-    ### Calc both polynomials using ploty, left_fit and right_fit ###
-    left_fitx = left_fit[0]*(ploty**2) + left_fit[1]*ploty + left_fit[2]
-    right_fitx = right_fit[0]*(ploty**2) + right_fit[1]*ploty + right_fit[2]
-    
-    return left_fitx, right_fitx, ploty, left_fit, right_fit
-
 # Search for lane lines around the given a polynomial.
 def search_around_poly(binary_warped, left_fit, right_fit, visualize=False):
-    print("ssssssssssss")
+    #print("ssssssssssss")
     # HYPERPARAMETER
     # Choose the width of the margin around the previous polynomial to search
     # The quiz grader expects 100 here, but feel free to tune on your own!
-    margin = 75
+    margin = 80
 
     # Grab activated pixels
     nonzero = binary_warped.nonzero()
@@ -215,6 +229,7 @@ def search_around_poly(binary_warped, left_fit, right_fit, visualize=False):
         left_fit = np.polyfit(lefty, leftx, 2)
         right_fit = np.polyfit(righty, rightx, 2)
     except:
+        print("exception in search around poly fit")
         return None, None
     
     
@@ -257,7 +272,7 @@ def search_around_poly(binary_warped, left_fit, right_fit, visualize=False):
         plt.show()
         
         ## End visualization steps ##
-    
+        
     return left_fit, right_fit
 
 # Based on the given polynomial coefficients for left
@@ -276,7 +291,8 @@ def get_predicted_lane(img_shape, left_fit, right_fit):
 # Calculates the curvature of polynomial functions in meters.    
 def measure_curvature_real(ploty, left_fit, right_fit):
     # Define conversions in x and y from pixels space to meters
-    ym_per_pix = 30/720 # meters per pixel in y dimension
+    #ym_per_pix = 30/720 # meters per pixel in y dimension
+    ym_per_pix = 3.0/100 # meters per pixel in y dimension
     xm_per_pix = 3.7/700 # meters per pixel in x dimension
        
     # Define y-value where we want radius of curvature
@@ -326,16 +342,24 @@ def get_thresholded_image(img):
     threshold_img[(hls_lselect_img == 1) | (lab_bselect_img == 1)] = 1  
     return threshold_img
 
+
+        
+    
+    
 # This function implements the image pipeline.
 # Given an image, it finds the lane lines, draws markers etc.    
 def image_pipeline(img):
-    global poly_left_fit
+    global poly_left_fit # To be removed
     global poly_right_fit
+    
     global avg_radius
     global center_offset_meters
     
     global num_frames
     global num_invalid_frames
+    
+    global left_line
+    global right_line
     
     num_frames = num_frames + 1
     
@@ -362,78 +386,58 @@ def image_pipeline(img):
                       
     binary_warped = warp(threshold_img, src, dst)
 
-    if (poly_left_fit is None) or (poly_right_fit is None):
+    if (not left_line.detected) or (not right_line.detected):
         ## Find lane lines using sliding window search method
         left_fit, right_fit = sliding_window_lane_search(binary_warped)
     else:
         # Search around polynimial computed in the previous iteration
-        left_fit, right_fit = search_around_poly(binary_warped, poly_left_fit, poly_right_fit)
+        left_fit, right_fit = search_around_poly(binary_warped, left_line.best_fit, right_line.best_fit)
         #left_fit, right_fit = None, None
-        if left_fit is None or right_fit is None:
-            # Lets go back to sliding window search
-            left_fit, right_fit = sliding_window_lane_search(binary_warped)
     
     invalid_line = False
     
-    if left_fit is None or right_fit is None:
-        left_fit = poly_left_fit
-        right_fit = poly_right_fit
-        ploty = np.linspace(0, binary_warped.shape[0]-1, binary_warped.shape[0])
-        invalid_line = True
+    # Compute the width of the lane based on the left and right x-intercepts.
+    if left_fit is not None and right_fit is not None:
+        left_x_int = left_fit[0]*h**2 + left_fit[1]*h + left_fit[2]
+        right_x_int = right_fit[0]*h**2 + right_fit[1]*h + right_fit[2]
+        lane_width = abs(right_x_int - left_x_int)
+        #print(lane_width)
+        all_lane_width.append(lane_width)
+        if (lane_width < 280 or lane_width > 480):
+            left_fit = None
+            right_fit = None
     
+    left_line.update_poly_fit(left_fit)
+    right_line.update_poly_fit(right_fit)
+
     # Get the predicted lane lines
-    left_fitx, right_fitx, ploty = get_predicted_lane(binary_warped.shape, left_fit, right_fit)
+    left_fitx = None
+    right_fitx = None
+    
+    #print(left_line.best_fit, right_line.best_fit)
+    if left_line.best_fit is not None and right_line.best_fit is not None:
+        # compute the lane lnes based on best fit polynomial coefficients
+        left_fitx, right_fitx, ploty = get_predicted_lane(binary_warped.shape, left_line.best_fit, right_line.best_fit)
         
-    # If either of the line points are None, consider it as a wrong line
-    if left_fitx is None or right_fitx is None:
-        invalid_line = True
-    else:
-        # Compute the mean horizontal distance between 
-        # left and right lines.
-        avg_lane_width = np.mean(right_fitx - left_fitx)
-        
-        if running_mean_hdistance == 0:
-            running_avg_lane_width = avg_lane_width
-        
-        if avg_lane_width < (0.8*running_avg_lane_width) or \
-           avg_lane_width > (1.2*running_avg_lane_width):
-            invalid_line = True
-        else:
-            # Update the running average of lane width
-            running_avg_lane_width = (0.9 * running_avg_lane_width) + \
-                                     (0.1 * avg_lane_width)
-    if invalid_line:
-        num_invalid_frames = num_invalid_frames + 1
-        
-    # Compute the radius of curvature
-    if not invalid_line:
-        left_radius, right_radius = measure_curvature_real(ploty, left_fit, right_fit)
+        # Compute the radius of curvature
+        left_radius, right_radius = measure_curvature_real(ploty, left_line.best_fit, right_line.best_fit)
         avg_radius = (left_radius + right_radius)/2
-    
-    radius_str = "Radius : %.3f m" % avg_radius
-    
-    # Compute offset from center
-    if not invalid_line:
+        radius_str = "Radius : %.3f m" % avg_radius
+        
+        # Compute offset from the center of lane
         center_of_lane = (right_fitx[h-1] + left_fitx[h-1])/2
         center_offset_meters = abs(w/2 - center_of_lane) * (3.7/700)
-    
-    center_offset_str = "Center offset: %.3f m" % center_offset_meters
-    
-    # Draw lane lines
-    out_img = draw_lane_lines(undist_img, binary_warped, left_fitx, right_fitx, ploty, src, dst)
-    
-    # Annotate the image with radius and center offset information
-    cv2.putText(out_img, radius_str , (100, 90), cv2.FONT_HERSHEY_SIMPLEX, 1.5, (255,255,255), thickness=2)
-    cv2.putText(out_img, center_offset_str, (100, 150), cv2.FONT_HERSHEY_SIMPLEX, 1.5, (255,255,255), thickness=2)
-    
-    print(left_fit, right_fit)
-    
-    if not invalid_line:
-        # Looks good, lets update the global polynomial coefficients
-        # Update global variables
-        poly_left_fit   = left_fit
-        poly_right_fit  = right_fit 
+        center_offset_str = "Center offset: %.3f m" % center_offset_meters
         
+        # Draw rectangle that covers the lane ahead of us
+        out_img = draw_lane_lines(undist_img, binary_warped, left_fitx, right_fitx, ploty, src, dst)
+
+        # Annotate the image with radius and center offset information
+        cv2.putText(out_img, radius_str , (100, 90), cv2.FONT_HERSHEY_SIMPLEX, 1.5, (255,255,255), thickness=2)
+        cv2.putText(out_img, center_offset_str, (100, 150), cv2.FONT_HERSHEY_SIMPLEX, 1.5, (255,255,255), thickness=2)
+    else:
+        out_img = img
+
     return out_img
     
 # Load the camera calibration coefficients
@@ -441,15 +445,16 @@ camera_cal_values = pickle.load(open("calibration.p", "rb"))
 mtx = camera_cal_values["mtx"]
 dist = camera_cal_values["dist"]
 
-## Read an image
+all_lane_width = []
+
 '''
+## Read an image
 image_file = 'test_images/test6.jpg'
 img = mpimg.imread(image_file)
 out_img = image_pipeline(img)
 plt.imshow(out_img)
 plt.show()
 '''
-
 
 from moviepy.editor import VideoFileClip
 import time
@@ -464,4 +469,11 @@ print("Time taken to process the video = %d sec"% (end_time - start_time))
 print("Num frames = ", num_frames)
 print("Num invalid frames = ", num_invalid_frames)
 
+'''
+print(all_lane_width)
+from statistics import mean
+print("Average lane width = ", mean(all_lane_width))
+print("Max lane width = ", max(all_lane_width))
+print("Min lane width = ", min(all_lane_width))
+'''
 ###########################################################################
