@@ -43,8 +43,8 @@ def test_thresholding():
                           (w-450,h)])
 
         # warped Image                  
-        warped_img = warp(undist_img, src, dst)
-        #warped_img = undist_img
+        #warped_img = warp(undist_img, src, dst)
+        warped_img = undist_img
 
         # Sobel Thresholding
         abs_sobel_img = abs_sobel_thresh(warped_img, 'x', thresh=(30,200))
@@ -68,7 +68,7 @@ def test_thresholding():
         #print(lab_bselect_img)
         
         if idx == 0:
-            axs[0].set_title('Unwarped Image', fontsize=10)
+            axs[0].set_title('Original Image', fontsize=10)
             axs[1].set_title('Abs Sobel', fontsize=10)
             axs[2].set_title('Mag Sobel', fontsize=10)
             axs[3].set_title('Dir Sobel', fontsize=10)
