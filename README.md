@@ -125,6 +125,7 @@ Provide a link to your final video output. Your pipeline should perform reasonab
 
 Link to my project video output is [here](./project_video_output.mp4)
 
+Link to challenge video output is [here](./challenge_video_output.mp)
 
 ### Briefly discuss any problems / issues you faced in your implementation of this project. Where will your pipeline likely fail? What could you do to make it more robust?
 
