@@ -76,7 +76,7 @@ Following is an example of perpective transformation applied on a test image.
 
 There are two functions implemented to identify the lane lines. `sliding_window_lane_search()` and `search_around_poly()`. 
 
-`sliding_window_lane_search()` uses histogram with sliding window algortithm as explained in the class material. This function computes histogram of the lower half of the image to identify the left and right base "X" points. Original implementaton in the quiz was looking for a peak in left and right half of the histogram. One change I made was to narrow the region that looks for histogram peak. This implementation identifies left line from quarter-point to mid-point of the histogram. Similarly, it looks for right line from mid-point to three quarter point. This has helped to remove the adjacent lane lines being detected. Once the left and right base points are identified, sliding window algorithm is used to track the lines from bottom ("base") to all the way to top of the image. Pixels that belong to each lines are identified and using NumPy's `polyfit()` function a second order polynomial is fitted.
+`sliding_window_lane_search()` uses histogram with sliding window algortithm as explained in the class material. This function computes histogram of the lower half of the image to identify the left and right base "X" points. Original implementaton in the quiz was looking for a peak in left and right half of the histogram. One change I made was to narrow the region that looks for histogram peak. This implementation identifies left line from quarter-point to mid-point of the histogram. Similarly, it looks for right line from mid-point to three quarter point. This has helped to avoid the adjacent lane lines being detected. Once the left and right base points are identified, sliding window algorithm is used to track the lines from bottom ("base") to all the way to top of the image. Pixels that belong to each lines are identified and using NumPy's `polyfit()` function a second order polynomial is fitted.
 
 Here is an example of sliding window on a test image.
 
@@ -84,23 +84,46 @@ Here is an example of sliding window on a test image.
 
 `search_around_poly()` function also identifies the lane line polynomial from a previously detected polynomial. This function is more efficient than the `sliding_window_lane_search()` since it only searchs +/-100 pixels around previously found polynomial. 
 
-Following image shows the lane line search area in "Green". Red and Blue dots shows the pixels indetified for left and right lines respectively and Yellow line shows the polynomial fit using the pixels detected in the current frame.
+Following image shows the lane line search area in "Green". Red and Blue dots shows the pixels identified for left and right lines respectively and Yellow line shows the polynomial fit using the pixels detected in the current frame.
 
 <img src="output_images/search_around_poly.jpg" width=840 align="center"/>
 
 
 #### 5. Describe how (and identify where in your code) you calculated the radius of curvature of the lane and the position of the vehicle with respect to center.
 
-Radius of curvature was computed based on the equations presented in "Measureing Curvature" section of "Advanced Computer Vision" lesson. 
+Radius of curvature was computed based on the equations presented in "Measureing Curvature" section of "Advanced Computer Vision" lesson. This is explained in detail [here](https://www.intmath.com/applications-differentiation/8-radius-curvature.php). This is implemented in `measure_curvature_real()`.
 
+I have converted the distance from pixels to meters using following equation.
+```python
+    ym_per_pix = 30/720 # meters per pixel in y dimension
+    xm_per_pix = 3.7/700 # meters per pixel in x dimension
+```
 
+The radius of curvature is computed on left and right lines separately on each frame and the average of left and right radius is used for reporting.
+
+Position of the vehicle from the center of the lane was calculated using following lines of code.
+
+```python
+center_of_lane = (right_fitx[h-1] + left_fitx[h-1])/2
+center_offset_meters = abs(w/2 - center_of_lane) * (3.7/700)
+```
+The above code finds the x-intercept of left and right lines, it then finds the center of the lane. Assuming that the camera is mounted on the center of the vehicle, vehicle position is the difference between lane center point and image mid-point. As you can see from the implementation above, a factor of `3.7/700` is applied to convert the position to "meters" from pixel space.
 
 #### 6. Provide an example image of your result plotted back down onto the road such that the lane area is identified clearly.
 
+This is implemented in function `draw_lane_lines()`. This function first creates a blank image and then, draws the left and right polinomial curves. It then fills the area between the curves in Green color. Inverse perspective transform is then applied on this image and then overlayed on to the undistorted raod image.
+
+Final output image generated by `image_pipeline()` function is annotated with radius of curvature and vehicle position. This is implemented using OpenCV `cv2.putText()`.
+
+Following is an example image generated by the `image_pipeline()` function.
+
+<img src="output_images/lane_boundaries.jpg" width=840 align="center"/>
 
 ### Pipeline (Video)
 
 Provide a link to your final video output. Your pipeline should perform reasonably well on the entire project video (wobbly lines are ok but no catastrophic failures that would cause the car to drive off the road!)
+
+Link to my project video output is [here](./project_video_output.mp4)
 
 
 ### Briefly discuss any problems / issues you faced in your implementation of this project. Where will your pipeline likely fail? What could you do to make it more robust?
