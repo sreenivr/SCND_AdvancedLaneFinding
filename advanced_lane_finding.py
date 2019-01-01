@@ -221,6 +221,7 @@ def search_around_poly(binary_warped, left_fit, right_fit, visualize=False):
     
     
     if visualize is True:
+        img_shape = binary_warped.shape
         # Generate x and y values for plotting
         ploty = np.linspace(0, img_shape[0]-1, img_shape[0])
         ### Calc both polynomials using ploty, left_fit and right_fit ###
@@ -278,10 +279,8 @@ def get_predicted_lane(img_shape, left_fit, right_fit):
 # Calculates the curvature of polynomial functions in meters.    
 def measure_curvature_real(h, left_fitx, right_fitx):
     # Define conversions in x and y from pixels space to meters
-    #ym_per_pix = 30/720 # meters per pixel in y dimension
-    ym_per_pix = 3.0/100 # meters per pixel in y dimension
-    #xm_per_pix = 3.7/700 # meters per pixel in x dimension
-    xm_per_pix = 3.7/380 # meters per pixel in x dimension
+    ym_per_pix = 30/720 # meters per pixel in y dimension    
+    xm_per_pix = 3.7/700 # meters per pixel in x dimension
     
     y_points = np.linspace(0, h-1, h)
     # Define y-value where we want radius of curvature
@@ -350,18 +349,17 @@ def image_pipeline(img):
     ## Perspective transform
 
     # Hardcoded src and dst for perspective transform
-    # TODO: Is there a way to find src and dst programatically ?
     h,w = threshold_img.shape[:2]
-    src = np.float32([(575,464),
-                      (707,464), 
-                      (258,682), 
-                      (1049,682)])
+    src = np.float32([(630,450),
+                      (720,450), 
+                      (220,714), 
+                      (1130,714)])
                       
     dst = np.float32([(450,0),
-                      (w-450,0),
-                      (450,h),
-                      (w-450,h)])
-                      
+                      (830,0),
+                      (450,720),
+                      (830,720)])
+    
     binary_warped = warp(threshold_img, src, dst)
 
     if (not left_line.detected) or (not right_line.detected):
@@ -377,8 +375,7 @@ def image_pipeline(img):
         left_x_int = left_fit[0]*h**2 + left_fit[1]*h + left_fit[2]
         right_x_int = right_fit[0]*h**2 + right_fit[1]*h + right_fit[2]
         lane_width = abs(right_x_int - left_x_int)
-        #print(lane_width)
-        all_lane_width.append(lane_width)
+        
         if (lane_width < 280 or lane_width > 480):
             left_fit = None
             right_fit = None
@@ -416,22 +413,13 @@ def image_pipeline(img):
 
     return out_img
     
+
 # Load the camera calibration coefficients
 camera_cal_values = pickle.load(open("calibration.p", "rb"))
 mtx = camera_cal_values["mtx"]
 dist = camera_cal_values["dist"]
 
-all_lane_width = []
-
-'''
-## Read an image
-image_file = 'test_images/test6.jpg'
-img = mpimg.imread(image_file)
-out_img = image_pipeline(img)
-plt.imshow(out_img)
-plt.show()
-'''
-
+# Run the image_pipeline() on frames of the proect video.
 from moviepy.editor import VideoFileClip
 import time
 
@@ -444,10 +432,24 @@ end_time = time.time()
 print("Time taken to process the video = %d sec"% (end_time - start_time))
 
 '''
-print(all_lane_width)
-from statistics import mean
-print("Average lane width = ", mean(all_lane_width))
-print("Max lane width = ", max(all_lane_width))
-print("Min lane width = ", min(all_lane_width))
+## Read an image
+image_file = 'test_images/test2.jpg'
+img = mpimg.imread(image_file)
+out_img = image_pipeline(img)
+plt.imshow(out_img, cmap='gray')
+plt.show()
 '''
+
+'''
+# Display original image and undistorted image
+f, (ax1, ax2) = plt.subplots(1, 2, figsize=(20,10))
+f.subplots_adjust(hspace = .2, wspace=.05)
+ax1.imshow(undist_img, cmap='gray')
+ax1.set_title('Undistorted Image', fontsize=30)
+ax2.imshow(warped, cmap='gray')
+ax2.set_title('Warped Image', fontsize=30)
+plt.show()
+'''
+
+
 ###########################################################################
