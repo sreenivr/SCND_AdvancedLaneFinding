@@ -139,7 +139,9 @@ Link to challenge video output is [here](./challenge_video_output.mp4)
 
 One of the issue I came across during the implementation was that it was detecting lines from adjacent lanes on project video. This was resolved by narrowing the histogram search `sliding_window_lane_search()` as described in Rubric point #4.
 
-I have found that this implementation doesn't work very well with challenge video in some of the frames due to cracks in the road or other edges detected on the shoulder of the road. This implementation fails in almost all of the sections of harder challenge video. Based on my understanding from the discussion forums it seems that we may need deep learning based algorithms to deal with harder challenge video.
+This implementation is likely fail with tricky lighting conditions, rainy conditions, sharp road turns etc.
+
+I have found that this implementation doesn't work very well with challenge video due to cracks in the road or other edges detected on the shoulder of the road. This implementation fails in almost all of the sections of harder challenge video. Based on my understanding from the discussion forums it seems that we may need deep learning based algorithms to deal with harder challenge video.
 
 
 
